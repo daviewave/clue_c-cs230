@@ -1733,7 +1733,7 @@ git commit -m "feat: add the clue command with win and loss detection"
 **Interfaces:**
 - Consumes: `build/adventure`, `CLUE_SEED`.
 
-- [ ] **Step 1: Write the runner**
+- [x] **Step 1: Write the runner**
 
 ```bash
 #!/usr/bin/env bash
@@ -1765,7 +1765,7 @@ done
 exit $status
 ```
 
-- [ ] **Step 2: Write the cases**
+- [x] **Step 2: Write the cases**
 
 Explore the seed-1 layout with `printf 'look\nlist\n' | CLUE_SEED=1 build/adventure`
 and pick seeds for the cases that need a particular layout. Each case is an
@@ -1787,12 +1787,12 @@ and pick seeds for the cases that need a particular layout. Each case is an
 Generate each `.expected` with the same command the runner uses, then read it
 and confirm it shows the listed behaviour before committing it.
 
-- [ ] **Step 3: Run the suite to verify it passes**
+- [x] **Step 3: Run the suite to verify it passes**
 
 Run: `make test`
 Expected: `PASS` for every unit binary and every e2e case, exit 0.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add test/e2e
@@ -1806,23 +1806,23 @@ git commit -m "test: add end-to-end transcript cases under fixed CLUE_SEED"
 **Files:**
 - Modify: `README.txt`
 
-- [ ] **Step 1: Run the gate**
+- [x] **Step 1: Run the gate**
 
 Run: `make clean && make && make check && make test && make dist`
 Expected: every step exits 0; `dist/adventure` is built by the flat Makefile.
 
-- [ ] **Step 2: Independent review**
+- [x] **Step 2: Independent review**
 
 A reviewer reads `docs/spec.md` and `src/`, lists every unmet rubric bullet
 and audits every `calloc` against its `free` on every exit path (win, lose,
 quit, EOF, setup failure). Fix each finding, re-run the gate.
 
-- [ ] **Step 3: Finish README.txt**
+- [x] **Step 3: Finish README.txt**
 
 Overview, build/run, the requirements map (every spec requirement bullet and
 every rubric bullet with file and function), design notes, `Video: <VIDEO URL TO BE ADDED>`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add README.txt
