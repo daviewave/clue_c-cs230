@@ -1,0 +1,10 @@
+build/
+dist/
+*.o
+*.d
+core
+core.*
+output.txt
+*.swp
+*~
+.DS_Store
