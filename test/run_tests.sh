@@ -33,7 +33,9 @@ run_one_unit_binary() {
 run_every_unit_binary() {
     local binary
     for binary in "$UNIT_DIR"/test_*; do
-        [ -x "$binary" ] && run_one_unit_binary "$binary"
+        if [ -x "$binary" ]; then
+            run_one_unit_binary "$binary"
+        fi
     done
 }
 

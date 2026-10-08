@@ -208,7 +208,7 @@ print their usage line when it is missing.
 | `go DIR` | `go` alone -> usage; unknown word -> `There is no direction 'x'. Use north, south, east or west.`; wall -> `You cannot go <dir> from here.`; otherwise move and `look` |
 | `take ITEM` | item in room -> moved to inventory, `You take the knife.`; else `There is no 'knife' here.` |
 | `drop ITEM` | item in inventory -> moved to room, `You drop the knife.`; else `You are not carrying 'knife'.` |
-| `inventory` | `You are carrying: knife, rope` or `You are carrying nothing.` |
+| `inventory` | `You are carrying: knife, rope` or `You are carrying: nothing` |
 | `clue CHAR` | see section 7 |
 | `quit` | `Goodbye.`, state = QUIT |
 

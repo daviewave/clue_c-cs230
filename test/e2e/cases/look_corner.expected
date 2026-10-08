@@ -1,0 +1,20 @@
+Welcome to Clue.
+Someone was murdered in this mansion. Find out who did it, where, and with what.
+Type 'help' for the list of commands.
+== hall ==
+A grand staircase, a grandfather clock and muddy footprints.
+  north  nothing
+  south  billiard
+  east   conservatory
+  west   nothing
+Characters here: peacock
+Items here: wrench
+> == hall ==
+A grand staircase, a grandfather clock and muddy footprints.
+  north  nothing
+  south  billiard
+  east   conservatory
+  west   nothing
+Characters here: peacock
+Items here: wrench
+> Goodbye.

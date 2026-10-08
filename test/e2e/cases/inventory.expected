@@ -1,0 +1,13 @@
+Welcome to Clue.
+Someone was murdered in this mansion. Find out who did it, where, and with what.
+Type 'help' for the list of commands.
+== ballroom ==
+A chandelier lights a floor polished for dancing nobody came to do.
+  north  study
+  south  nothing
+  east   nothing
+  west   lounge
+Characters here: none
+Items here: candlestick
+> You are carrying: nothing
+> Goodbye.

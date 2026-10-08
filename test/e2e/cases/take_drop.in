@@ -1,0 +1,8 @@
+go north
+take revolver
+inventory
+drop revolver
+look
+take unicorn
+drop rope
+quit

@@ -1,0 +1,7 @@
+go north
+take revolver
+inventory
+go south
+go west
+go west
+clue white
