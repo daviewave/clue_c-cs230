@@ -13,7 +13,11 @@
 # The spec demands -std=c99. The warning set is the conventions' mandatory
 # development set and is treated as errors so nothing slips through.
 # -MMD -MP writes a .d file next to each object so header edits trigger rebuilds.
-CC ?= gcc
+# make predefines CC=cc, so ?= would never apply; only a command-line or
+# environment CC overrides this default.
+ifeq ($(origin CC),default)
+CC := gcc
+endif
 STD := -std=c99
 WARNINGS := -Wall -Wextra -Wpedantic -Wshadow -Wstrict-prototypes \
             -Wmissing-prototypes -Wconversion -Wvla -Werror
