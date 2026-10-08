@@ -302,34 +302,105 @@ static void handle_list(Game *game, const char *argument) {
     print_names("Items", ITEM_NAMES, ITEM_COUNT);
 }
 
+/* Prints the room behind each of the four exits, or "nothing" for a wall. */
+static void print_exits(const Room *room) {
+    for (int direction = 0; direction < DIRECTION_COUNT; direction++) {
+        const Room *next = room_in_direction(room, (Direction)direction);
+        printf("  %-6s %s\n", direction_name((Direction)direction),
+               next != NULL ? next->name : "nothing");
+    }
+}
+
+/* Prints the suspects standing in the avatar's room. */
+static void print_characters_here(const Game *game) {
+    bool any = false;
+    fputs("Characters here:", stdout);
+    for (size_t i = 0; i < CHARACTER_COUNT; i++) {
+        if (game->characters[i]->room == game->avatar->room) {
+            printf("%s%s", any ? ", " : " ", game->characters[i]->name);
+            any = true;
+        }
+    }
+    puts(any ? "" : " none");
+}
+
+/* Prints label and the names in items, or empty_text when there are none. */
+static void print_items(const char *label, const Item *items, const char *empty_text) {
+    fputs(label, stdout);
+    if (items == NULL) {
+        printf(" %s\n", empty_text);
+        return;
+    }
+    for (const Item *item = items; item != NULL; item = item->next) {
+        printf("%s%s", item == items ? " " : ", ", item->name);
+    }
+    putchar('\n');
+}
+
+/* Describes the current room: exits, characters and items. */
 static void handle_look(Game *game, const char *argument) {
-    (void)game;
     (void)argument;
-    print_usage("look");
+    const Room *room = game->avatar->room;
+    printf("== %s ==\n%s\n", room->name, room->description);
+    print_exits(room);
+    print_characters_here(game);
+    print_items("Items here:", room->items, "none");
 }
 
+/* Moves the avatar through the room pointer in the given direction. */
 static void handle_go(Game *game, const char *argument) {
-    (void)game;
-    (void)argument;
-    print_usage("go");
+    if (*argument == '\0') {
+        print_usage("go");
+        return;
+    }
+    Direction direction = parse_direction(argument);
+    if (direction == DIRECTION_NONE) {
+        printf("There is no direction '%s'. Use north, south, east or west.\n", argument);
+        return;
+    }
+    Room *destination = room_in_direction(game->avatar->room, direction);
+    if (destination == NULL) {
+        printf("You cannot go %s from here.\n", direction_name(direction));
+        return;
+    }
+    move_character(game->avatar, destination);
+    handle_look(game, "");
 }
 
+/* Moves an item from the room's list to the inventory. */
 static void handle_take(Game *game, const char *argument) {
-    (void)game;
-    (void)argument;
-    print_usage("take");
+    if (*argument == '\0') {
+        print_usage("take");
+        return;
+    }
+    Item *item = drop_item(&game->avatar->room->items, argument);
+    if (item == NULL) {
+        printf("There is no '%s' here.\n", argument);
+        return;
+    }
+    add_item(&game->avatar->inventory, item);
+    printf("You take the %s.\n", item->name);
 }
 
+/* Moves an item from the inventory to the room's list. */
 static void handle_drop(Game *game, const char *argument) {
-    (void)game;
-    (void)argument;
-    print_usage("drop");
+    if (*argument == '\0') {
+        print_usage("drop");
+        return;
+    }
+    Item *item = drop_item(&game->avatar->inventory, argument);
+    if (item == NULL) {
+        printf("You are not carrying '%s'.\n", argument);
+        return;
+    }
+    add_item(&game->avatar->room->items, item);
+    printf("You drop the %s.\n", item->name);
 }
 
+/* Lists what the avatar carries. */
 static void handle_inventory(Game *game, const char *argument) {
-    (void)game;
     (void)argument;
-    print_usage("inventory");
+    print_items("You are carrying:", game->avatar->inventory, "nothing");
 }
 
 static void handle_clue(Game *game, const char *argument) {

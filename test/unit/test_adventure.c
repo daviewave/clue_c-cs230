@@ -128,6 +128,81 @@ static void test_quit_sets_state(void) {
     teardown_game(&game);
 }
 
+static Room *room_with_item(Game *game) {
+    for (size_t i = 0; i < ROOM_COUNT; i++) {
+        if (game->rooms[i]->items != NULL) {
+            return game->rooms[i];
+        }
+    }
+    return NULL;
+}
+
+static void test_go_follows_pointers_and_refuses_walls(void) {
+    Game game = {0};
+    srand(3);
+    CHECK(setup_game(&game));
+    move_character(game.avatar, game.rooms[0]);
+    char north[] = "go north";
+    run_command(&game, north);
+    CHECK(game.avatar->room == game.rooms[0]);
+    char east[] = "go east";
+    run_command(&game, east);
+    CHECK(game.avatar->room == game.rooms[1]);
+    char up[] = "go up";
+    run_command(&game, up);
+    CHECK(game.avatar->room == game.rooms[1]);
+    char bare[] = "go";
+    run_command(&game, bare);
+    CHECK(game.avatar->room == game.rooms[1]);
+    teardown_game(&game);
+}
+
+static void test_take_and_drop_round_trip(void) {
+    Game game = {0};
+    srand(3);
+    CHECK(setup_game(&game));
+    Room *room = room_with_item(&game);
+    const char *name = room->items->name;
+    move_character(game.avatar, room);
+    char take[LINE_CAPACITY];
+    snprintf(take, sizeof take, "take %s", name);
+    run_command(&game, take);
+    CHECK(room->items == NULL);
+    CHECK(find_item(game.avatar->inventory, name) != NULL);
+    char drop[LINE_CAPACITY];
+    snprintf(drop, sizeof drop, "drop %s", name);
+    run_command(&game, drop);
+    CHECK(game.avatar->inventory == NULL);
+    CHECK(find_item(room->items, name) != NULL);
+    teardown_game(&game);
+}
+
+static void test_take_and_drop_refuse_wrong_list(void) {
+    Game game = {0};
+    srand(3);
+    CHECK(setup_game(&game));
+    Room *room = room_with_item(&game);
+    const char *name = room->items->name;
+    move_character(game.avatar, room);
+    char drop[LINE_CAPACITY];
+    snprintf(drop, sizeof drop, "drop %s", name);
+    run_command(&game, drop);
+    CHECK_EQ_INT(count_items(room->items), 1);
+    CHECK(game.avatar->inventory == NULL);
+    char take[LINE_CAPACITY];
+    snprintf(take, sizeof take, "take %s", name);
+    run_command(&game, take);
+    char again[LINE_CAPACITY];
+    snprintf(again, sizeof again, "take %s", name);
+    run_command(&game, again);
+    CHECK_EQ_INT(count_items(game.avatar->inventory), 1);
+    CHECK(room->items == NULL);
+    char ghost[] = "take unicorn";
+    run_command(&game, ghost);
+    CHECK_EQ_INT(count_items(game.avatar->inventory), 1);
+    teardown_game(&game);
+}
+
 int main(void) {
     test_setup_builds_a_complete_world();
     test_setup_is_reproducible_for_a_seed();
@@ -138,5 +213,8 @@ int main(void) {
     test_read_line_strips_newline_and_reports_eof();
     test_read_line_drains_overlong_line();
     test_quit_sets_state();
+    test_go_follows_pointers_and_refuses_walls();
+    test_take_and_drop_round_trip();
+    test_take_and_drop_refuse_wrong_list();
     CHECK_REPORT("test_adventure");
 }
