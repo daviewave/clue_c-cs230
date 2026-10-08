@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #define main adventure_main
 int adventure_main(void);
 #include "../../src/adventure.c"
@@ -60,9 +61,82 @@ static void test_teardown_tolerates_partial_setup(void) {
     CHECK(game.rooms[0] == NULL);
 }
 
+static void test_lowercase_and_split(void) {
+    char line[] = "  TAKE   Knife  ";
+    const char *verb = NULL;
+    const char *argument = NULL;
+    lowercase(line);
+    split_command(line, &verb, &argument);
+    CHECK_EQ_STR(verb, "take");
+    CHECK_EQ_STR(argument, "knife");
+}
+
+static void test_split_without_argument(void) {
+    char line[] = "look";
+    const char *verb = NULL;
+    const char *argument = NULL;
+    split_command(line, &verb, &argument);
+    CHECK_EQ_STR(verb, "look");
+    CHECK_EQ_STR(argument, "");
+    char blank[] = "   ";
+    split_command(blank, &verb, &argument);
+    CHECK_EQ_STR(verb, "");
+    CHECK_EQ_STR(argument, "");
+}
+
+static void test_find_command(void) {
+    CHECK(find_command("help") != NULL);
+    CHECK(find_command("clue") != NULL);
+    CHECK(find_command("dance") == NULL);
+    CHECK_EQ_INT(COMMAND_COUNT, 9);
+}
+
+static FILE *open_input(const char *text) {
+    FILE *in = fmemopen((void *)text, strlen(text), "r");
+    CHECK(in != NULL);
+    return in;
+}
+
+static void test_read_line_strips_newline_and_reports_eof(void) {
+    char buffer[LINE_CAPACITY];
+    FILE *in = open_input("look\ngo north");
+    CHECK(read_line(buffer, sizeof buffer, in));
+    CHECK_EQ_STR(buffer, "look");
+    CHECK(read_line(buffer, sizeof buffer, in));
+    CHECK_EQ_STR(buffer, "go north");
+    CHECK(!read_line(buffer, sizeof buffer, in));
+    fclose(in);
+}
+
+static void test_read_line_drains_overlong_line(void) {
+    char buffer[8];
+    FILE *in = open_input("abcdefghijklmnop\nnext\n");
+    CHECK(read_line(buffer, sizeof buffer, in));
+    CHECK_EQ_STR(buffer, "abcdefg");
+    CHECK(read_line(buffer, sizeof buffer, in));
+    CHECK_EQ_STR(buffer, "next");
+    fclose(in);
+}
+
+static void test_quit_sets_state(void) {
+    Game game = {0};
+    srand(1);
+    CHECK(setup_game(&game));
+    char line[] = "QUIT";
+    run_command(&game, line);
+    CHECK_EQ_INT(game.state, GAME_QUIT);
+    teardown_game(&game);
+}
+
 int main(void) {
     test_setup_builds_a_complete_world();
     test_setup_is_reproducible_for_a_seed();
     test_teardown_tolerates_partial_setup();
+    test_lowercase_and_split();
+    test_split_without_argument();
+    test_find_command();
+    test_read_line_strips_newline_and_reports_eof();
+    test_read_line_drains_overlong_line();
+    test_quit_sets_state();
     CHECK_REPORT("test_adventure");
 }

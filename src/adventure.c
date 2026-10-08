@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -159,7 +160,231 @@ static void teardown_game(Game *game) {
     game->avatar = NULL;
 }
 
-/* Builds the world and tears it down; the command loop arrives in later tasks. */
+typedef void (*CommandHandler)(Game *game, const char *argument);
+
+/* One row of the command table that help prints. */
+typedef struct Command {
+    const char *name;
+    const char *usage;
+    const char *description;
+    CommandHandler handler;
+} Command;
+
+static void handle_help(Game *game, const char *argument);
+static void handle_list(Game *game, const char *argument);
+static void handle_look(Game *game, const char *argument);
+static void handle_go(Game *game, const char *argument);
+static void handle_take(Game *game, const char *argument);
+static void handle_drop(Game *game, const char *argument);
+static void handle_inventory(Game *game, const char *argument);
+static void handle_clue(Game *game, const char *argument);
+static void handle_quit(Game *game, const char *argument);
+
+static const Command COMMANDS[] = {
+    {"help", "help", "show this table of commands", handle_help},
+    {"list", "list", "list every room, character and item", handle_list},
+    {"look", "look", "describe the room you are in", handle_look},
+    {"go", "go DIRECTION", "walk north, south, east or west", handle_go},
+    {"take", "take ITEM", "pick up an item lying in the room", handle_take},
+    {"drop", "drop ITEM", "put down an item you are carrying", handle_drop},
+    {"inventory", "inventory", "show what you are carrying", handle_inventory},
+    {"clue", "clue CHARACTER", "summon a character and test your theory", handle_clue},
+    {"quit", "quit", "leave the game", handle_quit},
+};
+
+enum { COMMAND_COUNT = sizeof COMMANDS / sizeof COMMANDS[0] };
+
+/* Reads the rest of the current line so an overlong line counts as one command. */
+static void drain_line(FILE *in) {
+    int c;
+    do {
+        c = getc(in);
+    } while (c != '\n' && c != EOF);
+}
+
+/* Reads one line into buffer without its newline.
+ * @return false at end of input. */
+static bool read_line(char *buffer, size_t capacity, FILE *in) {
+    if (fgets(buffer, (int)capacity, in) == NULL) {
+        return false;
+    }
+    size_t length = strcspn(buffer, "\n");
+    if (buffer[length] == '\n') {
+        buffer[length] = '\0';
+    } else {
+        drain_line(in);
+    }
+    return true;
+}
+
+/* Lowercases text in place so commands and names are case-insensitive. */
+static void lowercase(char *text) {
+    for (; *text != '\0'; text++) {
+        *text = (char)tolower((unsigned char)*text);
+    }
+}
+
+/* @return the first non-blank character at or after text. */
+static char *skip_blanks(char *text) {
+    while (isspace((unsigned char)*text)) {
+        text++;
+    }
+    return text;
+}
+
+/* Cuts trailing blanks off text. */
+static void trim_trailing_blanks(char *text) {
+    size_t length = strlen(text);
+    while (length > 0 && isspace((unsigned char)text[length - 1])) {
+        text[--length] = '\0';
+    }
+}
+
+/* Splits line in place into the verb and the rest; both point into line and
+ * the argument is "" when there is none. */
+static void split_command(char *line, const char **verb, const char **argument) {
+    char *cursor = skip_blanks(line);
+    *verb = cursor;
+    while (*cursor != '\0' && !isspace((unsigned char)*cursor)) {
+        cursor++;
+    }
+    if (*cursor != '\0') {
+        *cursor = '\0';
+        cursor = skip_blanks(cursor + 1);
+    }
+    trim_trailing_blanks(cursor);
+    *argument = cursor;
+}
+
+/* @return the table row for verb, or NULL. */
+static const Command *find_command(const char *verb) {
+    for (size_t i = 0; i < COMMAND_COUNT; i++) {
+        if (strcmp(COMMANDS[i].name, verb) == 0) {
+            return &COMMANDS[i];
+        }
+    }
+    return NULL;
+}
+
+/* Prints the usage line of a command from the table. */
+static void print_usage(const char *command_name) {
+    const Command *command = find_command(command_name);
+    if (command != NULL) {
+        printf("Usage: %s\n", command->usage);
+    }
+}
+
+/* Prints one line per command; the table is the help text. */
+static void handle_help(Game *game, const char *argument) {
+    (void)game;
+    (void)argument;
+    puts("Commands:");
+    for (size_t i = 0; i < COMMAND_COUNT; i++) {
+        printf("  %-16s %s\n", COMMANDS[i].usage, COMMANDS[i].description);
+    }
+}
+
+/* Prints a label followed by the comma-separated names. */
+static void print_names(const char *label, const char *const names[], size_t count) {
+    printf("%s:", label);
+    for (size_t i = 0; i < count; i++) {
+        printf("%s%s", i == 0 ? " " : ", ", names[i]);
+    }
+    putchar('\n');
+}
+
+/* Lists the catalogues of rooms, characters and items. */
+static void handle_list(Game *game, const char *argument) {
+    (void)game;
+    (void)argument;
+    print_names("Rooms", ROOM_NAMES, ROOM_COUNT);
+    print_names("Characters", CHARACTER_NAMES, CHARACTER_COUNT);
+    print_names("Items", ITEM_NAMES, ITEM_COUNT);
+}
+
+static void handle_look(Game *game, const char *argument) {
+    (void)game;
+    (void)argument;
+    print_usage("look");
+}
+
+static void handle_go(Game *game, const char *argument) {
+    (void)game;
+    (void)argument;
+    print_usage("go");
+}
+
+static void handle_take(Game *game, const char *argument) {
+    (void)game;
+    (void)argument;
+    print_usage("take");
+}
+
+static void handle_drop(Game *game, const char *argument) {
+    (void)game;
+    (void)argument;
+    print_usage("drop");
+}
+
+static void handle_inventory(Game *game, const char *argument) {
+    (void)game;
+    (void)argument;
+    print_usage("inventory");
+}
+
+static void handle_clue(Game *game, const char *argument) {
+    (void)game;
+    (void)argument;
+    print_usage("clue");
+}
+
+/* Ends the game at the player's request. */
+static void handle_quit(Game *game, const char *argument) {
+    (void)argument;
+    puts("Goodbye.");
+    game->state = GAME_QUIT;
+}
+
+/* Lowercases, splits and dispatches one line of input. */
+static void run_command(Game *game, char *line) {
+    const char *verb = NULL;
+    const char *argument = NULL;
+    lowercase(line);
+    split_command(line, &verb, &argument);
+    if (*verb == '\0') {
+        return;
+    }
+    const Command *command = find_command(verb);
+    if (command == NULL) {
+        printf("Unknown command '%s'. Type 'help' for the list of commands.\n", verb);
+        return;
+    }
+    command->handler(game, argument);
+}
+
+/* Prompts and runs commands until the game is won, lost, quit or input ends. */
+static void play(Game *game) {
+    char line[LINE_CAPACITY];
+    while (game->state == GAME_PLAYING) {
+        fputs("> ", stdout);
+        fflush(stdout);
+        if (!read_line(line, sizeof line, stdin)) {
+            puts("\nGoodbye.");
+            game->state = GAME_QUIT;
+            return;
+        }
+        run_command(game, line);
+    }
+}
+
+/* Prints the premise once at start. */
+static void print_banner(void) {
+    puts("Welcome to Clue.");
+    puts("Someone was murdered in this mansion. Find out who did it, where, and with what.");
+    puts("Type 'help' for the list of commands.");
+}
+
+/* Seeds, builds the world, plays until the game ends and frees everything. */
 int main(void) {
     Game game = {0};
     seed_random();
@@ -168,6 +393,9 @@ int main(void) {
         teardown_game(&game);
         return EXIT_FAILURE;
     }
+    print_banner();
+    handle_look(&game, "");
+    play(&game);
     teardown_game(&game);
     return EXIT_SUCCESS;
 }
