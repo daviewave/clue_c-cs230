@@ -1,5 +1,6 @@
 #include "../../src/rooms.h"
 #include "check.h"
+#include "helpers.h"
 #include <stdbool.h>
 #include <stdlib.h>
 

@@ -32,7 +32,6 @@ void shuffle_rooms(Room *rooms[], size_t count, RandomPicker pick);
 Room *room_in_direction(const Room *room, Direction direction);
 Direction parse_direction(const char *word);
 const char *direction_name(Direction direction);
-Room *find_room(Room *const rooms[], size_t count, const char *name);
 void free_room(Room *room);
 
 #endif

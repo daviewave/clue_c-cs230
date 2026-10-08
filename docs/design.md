@@ -10,8 +10,8 @@ The spec fixes the file names, so the split follows the spec exactly:
 
 | File | Owns | Exposes |
 | --- | --- | --- |
-| `src/items.c/.h` | the `Item` node and singly linked item lists | `create_item`, `add_item`, `drop_item`, `find_item`, `count_items`, `free_items` |
-| `src/rooms.c/.h` | the `Room` struct, the four-way links, the 3x3 grid wiring, the shuffle, the `Direction` enum | `create_room`, `link_grid`, `shuffle_rooms`, `room_in_direction`, `parse_direction`, `direction_name`, `find_room`, `free_room` |
+| `src/items.c/.h` | the `Item` node and singly linked item lists | `create_item`, `add_item`, `drop_item`, `find_item`, `free_items` |
+| `src/rooms.c/.h` | the `Room` struct, the four-way links, the 3x3 grid wiring, the shuffle, the `Direction` enum | `create_room`, `link_grid`, `shuffle_rooms`, `room_in_direction`, `parse_direction`, `direction_name`, `free_room` |
 | `src/characters.c/.h` | the `Character` struct (also used for the avatar) | `create_character`, `move_character`, `find_character`, `free_character` |
 | `src/adventure.c` | the catalogues, world setup, the command table, the read-parse-dispatch loop, `main` | nothing (every helper is `static`) |
 
@@ -127,9 +127,10 @@ typedef void (*CommandHandler)(Game *game, const char *argument);
 typedef struct Command {
     const char *name;
     const char *usage;
+    const char *description;
     CommandHandler handler;
 } Command;
-static const Command COMMANDS[] = { {"help", "help", handle_help}, ... };
+static const Command COMMANDS[] = { {"help", "help", "show this table of commands", handle_help}, ... };
 ```
 
 `help` prints the table it is part of, so the handlers are prototyped above
@@ -181,7 +182,7 @@ standard's lack of a guarantee.
 print banner and starting room
 while state == PLAYING:
     prompt "> "
-    read_line -> on EOF: print "Goodbye." and leave the loop (state = QUIT)
+    read_line -> on EOF: print a newline (to close the prompt) and "Goodbye.", leave the loop (state = QUIT)
     lowercase, split into verb and argument (first whitespace run)
     empty verb -> continue
     find command -> not found: "Unknown command 'x'. Type 'help' for the list of commands."
@@ -220,6 +221,7 @@ handle_clue(game, name):
     unknown character     -> "There is no character named 'x'.", no clue consumed
     move_character(character, avatar->room)
     clues_used++
+    print "<char> arrives in the <room>."
     room_match      = avatar->room == answer_room
     character_match = answer_character->room == avatar->room
     item_match      = find_item(avatar->room->items, answer_item)
@@ -227,7 +229,7 @@ handle_clue(game, name):
     print "Room Match" / "Character Match" / "Item Match" for each true flag
     (print "No matches." when none, so the player gets a line back)
     all three        -> "You solved the mystery: <char> in the <room> with the <item>. You win!", state = WON
-    clues_used == 10 -> "That was your 10th clue. The answer was <...>. You lose.", state = LOST
+    clues_used == 10 -> "You have used all 10 clues. It was <char> in the <room> with the <item>. You lose.", state = LOST
     else             -> "Clues used: n of 10."
 ```
 
@@ -273,7 +275,12 @@ every path by hand.
 
 ## 10. Deviations from the house conventions
 
-None. The spec's file list leaves no room for a separate parser or random
+One, in the Makefile: the conventions ask for `CC ?= gcc`, but make predefines
+`CC = cc`, so `?=` never applies and the course's `gcc` would not be used. The
+Makefile sets `CC := gcc` only when `$(origin CC)` is `default`, which keeps
+the intended behaviour (a command-line or environment `CC` still overrides).
+
+Everything else follows the conventions. The spec's file list leaves no room for a separate parser or random
 module, so the parser lives in `adventure.c` as static functions and is
 tested through the include trick, and the random source is injected into
 `rooms.c` as a function pointer instead of creating a `random.c`.

@@ -4,6 +4,7 @@ int adventure_main(void);
 #include "../../src/adventure.c"
 #undef main
 #include "check.h"
+#include "helpers.h"
 
 static size_t total_items_in_rooms(const Game *game) {
     size_t total = 0;
@@ -203,7 +204,16 @@ static void test_take_and_drop_refuse_wrong_list(void) {
     teardown_game(&game);
 }
 
-static void rig_answer(Game *game, bool room, bool character, bool item) {
+typedef enum { ITEM_ELSEWHERE, ITEM_IN_ROOM, ITEM_CARRIED } ItemPlacement;
+
+static Item **list_for(Game *game, ItemPlacement placement, Room *elsewhere) {
+    if (placement == ITEM_CARRIED) {
+        return &game->avatar->inventory;
+    }
+    return placement == ITEM_IN_ROOM ? &game->avatar->room->items : &elsewhere->items;
+}
+
+static void rig_answer(Game *game, bool room, bool character, ItemPlacement item) {
     Room *here = game->avatar->room;
     Room *elsewhere = here == game->rooms[0] ? game->rooms[1] : game->rooms[0];
     game->answer_room = room ? here : elsewhere;
@@ -214,14 +224,14 @@ static void rig_answer(Game *game, bool room, bool character, bool item) {
     for (size_t i = 0; i < ROOM_COUNT && node == NULL; i++) {
         node = drop_item(&game->rooms[i]->items, ITEM_NAMES[0]);
     }
-    add_item(item ? &game->avatar->inventory : &elsewhere->items, node);
+    add_item(list_for(game, item, elsewhere), node);
 }
 
 static void test_evaluate_clue_reports_each_match(void) {
     Game game = {0};
     srand(5);
     CHECK(setup_game(&game));
-    rig_answer(&game, true, false, true);
+    rig_answer(&game, true, false, ITEM_CARRIED);
     ClueResult result = evaluate_clue(&game);
     CHECK(result.room);
     CHECK(!result.character);
@@ -229,11 +239,24 @@ static void test_evaluate_clue_reports_each_match(void) {
     teardown_game(&game);
 }
 
+static void test_evaluate_clue_sees_item_lying_in_the_room(void) {
+    Game game = {0};
+    srand(5);
+    CHECK(setup_game(&game));
+    rig_answer(&game, false, true, ITEM_IN_ROOM);
+    ClueResult result = evaluate_clue(&game);
+    CHECK(!result.room);
+    CHECK(result.character);
+    CHECK(result.item);
+    CHECK(game.avatar->inventory == NULL);
+    teardown_game(&game);
+}
+
 static void test_clue_moves_character_and_wins_on_three_matches(void) {
     Game game = {0};
     srand(5);
     CHECK(setup_game(&game));
-    rig_answer(&game, true, false, true);
+    rig_answer(&game, true, false, ITEM_CARRIED);
     char line[] = "clue scarlet";
     run_command(&game, line);
     CHECK(game.characters[0]->room == game.avatar->room);
@@ -246,7 +269,7 @@ static void test_clue_loses_on_tenth_without_all_matches(void) {
     Game game = {0};
     srand(5);
     CHECK(setup_game(&game));
-    rig_answer(&game, false, false, false);
+    rig_answer(&game, false, false, ITEM_ELSEWHERE);
     for (int i = 0; i < MAX_CLUES; i++) {
         char line[] = "clue mustard";
         CHECK_EQ_INT(game.state, GAME_PLAYING);
@@ -284,6 +307,7 @@ int main(void) {
     test_take_and_drop_round_trip();
     test_take_and_drop_refuse_wrong_list();
     test_evaluate_clue_reports_each_match();
+    test_evaluate_clue_sees_item_lying_in_the_room();
     test_clue_moves_character_and_wins_on_three_matches();
     test_clue_loses_on_tenth_without_all_matches();
     test_clue_unknown_character_is_free();

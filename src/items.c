@@ -48,15 +48,6 @@ Item *find_item(Item *list, const char *name) {
     return NULL;
 }
 
-/* @return the number of nodes in list. */
-size_t count_items(const Item *list) {
-    size_t count = 0;
-    for (const Item *item = list; item != NULL; item = item->next) {
-        count++;
-    }
-    return count;
-}
-
 /* Frees every node of list; the head pointer is dangling afterwards. */
 void free_items(Item *list) {
     while (list != NULL) {

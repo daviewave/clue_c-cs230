@@ -13,7 +13,6 @@ Item *create_item(const char *name);
 void add_item(Item **list, Item *item);
 Item *drop_item(Item **list, const char *name);
 Item *find_item(Item *list, const char *name);
-size_t count_items(const Item *list);
 void free_items(Item *list);
 
 #endif

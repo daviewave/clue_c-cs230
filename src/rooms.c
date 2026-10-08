@@ -71,16 +71,6 @@ const char *direction_name(Direction direction) {
     return direction < DIRECTION_COUNT ? DIRECTION_NAMES[direction] : "nowhere";
 }
 
-/* @return the room called name among rooms, or NULL. */
-Room *find_room(Room *const rooms[], size_t count, const char *name) {
-    for (size_t i = 0; i < count; i++) {
-        if (strcmp(rooms[i]->name, name) == 0) {
-            return rooms[i];
-        }
-    }
-    return NULL;
-}
-
 /* Frees the room and every item still lying in it. */
 void free_room(Room *room) {
     if (room != NULL) {

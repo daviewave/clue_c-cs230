@@ -1,6 +1,6 @@
 # Clue Text Adventure Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** work through this plan one task at a time, test first. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A C99 Clue text adventure: nine shuffled rooms on a 3x3 grid, five characters, six items, an avatar with an inventory, a command table, and a `clue` command that wins on three matches or loses on the tenth clue.
 
@@ -43,7 +43,6 @@
   - `void add_item(Item **list, Item *item);` appends at the tail
   - `Item *drop_item(Item **list, const char *name);` unlinks and returns the node, NULL when absent
   - `Item *find_item(Item *list, const char *name);`
-  - `size_t count_items(const Item *list);`
   - `void free_items(Item *list);` frees every node, tolerates NULL
 
 - [x] **Step 1: Write the failing test**

@@ -1,5 +1,6 @@
 #include "../../src/characters.h"
 #include "check.h"
+#include "helpers.h"
 #include <stdlib.h>
 
 static void test_create_starts_nowhere_with_empty_inventory(void) {

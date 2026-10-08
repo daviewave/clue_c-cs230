@@ -1,5 +1,6 @@
 #include "../../src/items.h"
 #include "check.h"
+#include "helpers.h"
 #include <stdlib.h>
 
 static void test_add_appends_in_order(void) {

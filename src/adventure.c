@@ -22,14 +22,14 @@ typedef enum { GAME_PLAYING, GAME_WON, GAME_LOST, GAME_QUIT } GameState;
 
 /* The whole world; lives on main's stack and is passed to every handler. */
 typedef struct Game {
-    Room *rooms[ROOM_COUNT];
-    Character *characters[CHARACTER_COUNT];
+    Room *rooms[ROOM_COUNT];                /* row-major 3x3 board after the shuffle */
+    Character *characters[CHARACTER_COUNT]; /* the suspects; the avatar is separate */
     Character *avatar;
     const Room *answer_room;
-    const char *answer_item;
+    const char *answer_item;                /* a name: the node moves between lists */
     const Character *answer_character;
-    int clues_used;
-    GameState state;
+    int clues_used;                         /* valid clue commands so far, max MAX_CLUES */
+    GameState state;                        /* play() loops while GAME_PLAYING */
 } Game;
 
 static const char *const ROOM_NAMES[ROOM_COUNT] = {
@@ -444,7 +444,7 @@ static void resolve_clue(Game *game, ClueResult result) {
                game->answer_character->name, game->answer_room->name, game->answer_item);
         game->state = GAME_WON;
     } else if (game->clues_used >= MAX_CLUES) {
-        printf("That was your %dth clue. It was %s in the %s with the %s. You lose.\n",
+        printf("You have used all %d clues. It was %s in the %s with the %s. You lose.\n",
                MAX_CLUES, game->answer_character->name, game->answer_room->name,
                game->answer_item);
         game->state = GAME_LOST;

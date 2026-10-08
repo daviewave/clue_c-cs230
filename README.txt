@@ -17,7 +17,7 @@ The code is split exactly as the spec asks:
 
     src/items.c, items.h            Item struct and the singly linked item list
                                     (create_item, add_item, drop_item, find_item,
-                                    count_items, free_items)
+                                    free_items)
     src/rooms.c, rooms.h            Room struct, Direction enum, 3x3 grid linking,
                                     Fisher-Yates shuffle, direction parsing
     src/characters.c, characters.h  Character struct (also used for the avatar),
