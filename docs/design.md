@@ -164,9 +164,9 @@ tests: changing it changes every expected transcript.
    item `k` to the room at position `k` of the copy. Six distinct rooms get
    one item each; three rooms start empty. This is the "at most one item per
    room" requirement.
-4. Pick the answer: `rooms[random_below(9)]`, item name
+4. Create the avatar and place it in `rooms[random_below(9)]` (1 draw).
+5. Pick the answer: `rooms[random_below(9)]`, item name
    `ITEM_NAMES[random_below(6)]`, `characters[random_below(5)]` (3 draws).
-5. Create the avatar and place it in `rooms[random_below(9)]` (1 draw).
 
 `random_below(bound)` is `(size_t)rand() % bound`. The modulo bias for bounds
 up to 9 against `RAND_MAX` of 2^31-1 is below 1e-8 and irrelevant for a game.
