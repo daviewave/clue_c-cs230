@@ -46,7 +46,7 @@
   - `size_t count_items(const Item *list);`
   - `void free_items(Item *list);` frees every node, tolerates NULL
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```c
 /* test/unit/test_items.c */
@@ -120,12 +120,12 @@ int main(void) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `make build/test/test_items`
 Expected: compile error, `items.h` not found.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```c
 /* src/items.h */
@@ -221,12 +221,12 @@ void free_items(Item *list) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `make build/test/test_items && build/test/test_items`
 Expected: `test_items: 20 checks, 0 failures`, exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/items.h src/items.c test/unit/test_items.c
@@ -256,7 +256,7 @@ git commit -m "feat: add item linked list with add_item and drop_item"
   - `Room *find_room(Room *const rooms[], size_t count, const char *name);`
   - `void free_room(Room *room);` frees the item list too, tolerates NULL
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```c
 /* test/unit/test_rooms.c */
@@ -412,12 +412,12 @@ int main(void) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `make build/test/test_rooms`
 Expected: compile error, `rooms.h` not found.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```c
 /* src/rooms.h */
@@ -555,12 +555,12 @@ void free_room(Room *room) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `make build/test/test_rooms && build/test/test_rooms`
 Expected: `test_rooms: 36 checks, 0 failures`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/rooms.h src/rooms.c test/unit/test_rooms.c
@@ -584,7 +584,7 @@ git commit -m "feat: add rooms with grid linking, directions and shuffle"
   - `Character *find_character(Character *const characters[], size_t count, const char *name);`
   - `void free_character(Character *character);` frees the inventory too, tolerates NULL
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```c
 /* test/unit/test_characters.c */
@@ -643,12 +643,12 @@ int main(void) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `make build/test/test_characters`
 Expected: compile error, `characters.h` not found.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```c
 /* src/characters.h */
@@ -716,12 +716,12 @@ void free_character(Character *character) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `make build/test/test_characters && build/test/test_characters`
 Expected: `test_characters: 11 checks, 0 failures`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/characters.h src/characters.c test/unit/test_characters.c
@@ -748,7 +748,7 @@ git commit -m "feat: add characters with move_character"
   - `static void teardown_game(Game *game);`
   - `int main(void)` placeholder that sets up, tears down and returns `EXIT_SUCCESS`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```c
 /* test/unit/test_adventure.c */
@@ -822,12 +822,12 @@ int main(void) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `make build/test/test_adventure`
 Expected: compile error, `adventure.c` not found.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```c
 /* src/adventure.c */
@@ -1006,12 +1006,12 @@ int main(void) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `make build/test/test_adventure && build/test/test_adventure && make && build/adventure; echo $?`
 Expected: `test_adventure: 46 checks, 0 failures`; the binary exits 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/adventure.c test/unit/test_adventure.c
@@ -1040,7 +1040,7 @@ git commit -m "feat: build and tear down the shuffled world with seeded randomne
   - `static void play(Game *game);` the loop; `main` calls it
   - `handle_help`, `handle_list`, `handle_quit` complete; the other handlers print `Usage:` placeholders replaced in Tasks 6 and 7
 
-- [ ] **Step 1: Write the failing tests** (append to `test_adventure.c`, register in `main`)
+- [x] **Step 1: Write the failing tests** (append to `test_adventure.c`, register in `main`)
 
 ```c
 static void test_lowercase_and_split(void) {
@@ -1113,12 +1113,12 @@ static void test_quit_sets_state(void) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `make build/test/test_adventure`
 Expected: compile errors, `lowercase`, `split_command`, `find_command`, `read_line`, `run_command` undeclared.
 
-- [ ] **Step 3: Write minimal implementation** (insert after `teardown_game`, replace `main`)
+- [x] **Step 3: Write minimal implementation** (insert after `teardown_game`, replace `main`)
 
 ```c
 typedef void (*CommandHandler)(Game *game, const char *argument);
@@ -1329,12 +1329,12 @@ Add `#include <ctype.h>` at the top. Until Tasks 6 and 7 land, `handle_look`,
 `handle_go`, `handle_take`, `handle_drop`, `handle_inventory` and
 `handle_clue` are stubs that call `print_usage` with their own name.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `make build/test/test_adventure && build/test/test_adventure >/dev/null && printf 'HELP\nlist\nfoo\nquit\n' | CLUE_SEED=1 build/adventure`
 Expected: `0 failures`; the transcript shows the help table, the three list lines, the unknown-command hint and `Goodbye.`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/adventure.c test/unit/test_adventure.c
@@ -1352,7 +1352,7 @@ git commit -m "feat: add the command table, line parsing and the game loop"
 **Interfaces:**
 - Produces (static): full `handle_look`, `handle_go`, `handle_take`, `handle_drop`, `handle_inventory`; helpers `print_exits`, `print_characters_here`, `print_items`.
 
-- [ ] **Step 1: Write the failing tests** (append, register in `main`)
+- [x] **Step 1: Write the failing tests** (append, register in `main`)
 
 ```c
 static Room *room_with_item(Game *game) {
@@ -1429,12 +1429,12 @@ static void test_take_and_drop_refuse_wrong_list(void) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `make build/test/test_adventure && build/test/test_adventure >/dev/null`
 Expected: FAIL lines for `game.avatar->room == game.rooms[1]` and the take/drop checks (stubs do nothing).
 
-- [ ] **Step 3: Write the implementation** (replace the stubs)
+- [x] **Step 3: Write the implementation** (replace the stubs)
 
 ```c
 /* Prints the room behind each of the four exits, or "nothing" for a wall. */
@@ -1539,12 +1539,12 @@ static void handle_inventory(Game *game, const char *argument) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `make build/test/test_adventure && build/test/test_adventure >/dev/null && printf 'look\ngo north\ngo south\ninventory\n' | CLUE_SEED=1 build/adventure`
 Expected: `0 failures`; the transcript shows the room description with four exit lines, then either a move or `You cannot go ...`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/adventure.c test/unit/test_adventure.c
@@ -1562,7 +1562,7 @@ git commit -m "feat: add look, go, take, drop and inventory commands"
 **Interfaces:**
 - Produces (static): `typedef struct ClueResult { bool room; bool character; bool item; } ClueResult;`, `evaluate_clue`, `print_matches`, `resolve_clue`, full `handle_clue`.
 
-- [ ] **Step 1: Write the failing tests** (append, register in `main`)
+- [x] **Step 1: Write the failing tests** (append, register in `main`)
 
 ```c
 static void rig_answer(Game *game, bool room, bool character, bool item) {
@@ -1633,12 +1633,12 @@ static void test_clue_unknown_character_is_free(void) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `make build/test/test_adventure`
 Expected: compile error, `ClueResult` and `evaluate_clue` undeclared.
 
-- [ ] **Step 3: Write the implementation** (replace the `handle_clue` stub)
+- [x] **Step 3: Write the implementation** (replace the `handle_clue` stub)
 
 ```c
 /* Which of the three parts of the answer the avatar's room currently satisfies. */
@@ -1711,12 +1711,12 @@ static void handle_clue(Game *game, const char *argument) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `make build/test/test_adventure && build/test/test_adventure >/dev/null && make && make check`
 Expected: `0 failures`; `make check` clean.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/adventure.c test/unit/test_adventure.c
