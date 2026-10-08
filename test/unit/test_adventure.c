@@ -203,6 +203,73 @@ static void test_take_and_drop_refuse_wrong_list(void) {
     teardown_game(&game);
 }
 
+static void rig_answer(Game *game, bool room, bool character, bool item) {
+    Room *here = game->avatar->room;
+    Room *elsewhere = here == game->rooms[0] ? game->rooms[1] : game->rooms[0];
+    game->answer_room = room ? here : elsewhere;
+    game->answer_character = game->characters[0];
+    move_character(game->characters[0], character ? here : elsewhere);
+    game->answer_item = ITEM_NAMES[0];
+    Item *node = NULL;
+    for (size_t i = 0; i < ROOM_COUNT && node == NULL; i++) {
+        node = drop_item(&game->rooms[i]->items, ITEM_NAMES[0]);
+    }
+    add_item(item ? &game->avatar->inventory : &elsewhere->items, node);
+}
+
+static void test_evaluate_clue_reports_each_match(void) {
+    Game game = {0};
+    srand(5);
+    CHECK(setup_game(&game));
+    rig_answer(&game, true, false, true);
+    ClueResult result = evaluate_clue(&game);
+    CHECK(result.room);
+    CHECK(!result.character);
+    CHECK(result.item);
+    teardown_game(&game);
+}
+
+static void test_clue_moves_character_and_wins_on_three_matches(void) {
+    Game game = {0};
+    srand(5);
+    CHECK(setup_game(&game));
+    rig_answer(&game, true, false, true);
+    char line[] = "clue scarlet";
+    run_command(&game, line);
+    CHECK(game.characters[0]->room == game.avatar->room);
+    CHECK_EQ_INT(game.clues_used, 1);
+    CHECK_EQ_INT(game.state, GAME_WON);
+    teardown_game(&game);
+}
+
+static void test_clue_loses_on_tenth_without_all_matches(void) {
+    Game game = {0};
+    srand(5);
+    CHECK(setup_game(&game));
+    rig_answer(&game, false, false, false);
+    for (int i = 0; i < MAX_CLUES; i++) {
+        char line[] = "clue mustard";
+        CHECK_EQ_INT(game.state, GAME_PLAYING);
+        run_command(&game, line);
+    }
+    CHECK_EQ_INT(game.clues_used, MAX_CLUES);
+    CHECK_EQ_INT(game.state, GAME_LOST);
+    teardown_game(&game);
+}
+
+static void test_clue_unknown_character_is_free(void) {
+    Game game = {0};
+    srand(5);
+    CHECK(setup_game(&game));
+    char typo[] = "clue plumb";
+    run_command(&game, typo);
+    char bare[] = "clue";
+    run_command(&game, bare);
+    CHECK_EQ_INT(game.clues_used, 0);
+    CHECK_EQ_INT(game.state, GAME_PLAYING);
+    teardown_game(&game);
+}
+
 int main(void) {
     test_setup_builds_a_complete_world();
     test_setup_is_reproducible_for_a_seed();
@@ -216,5 +283,9 @@ int main(void) {
     test_go_follows_pointers_and_refuses_walls();
     test_take_and_drop_round_trip();
     test_take_and_drop_refuse_wrong_list();
+    test_evaluate_clue_reports_each_match();
+    test_clue_moves_character_and_wins_on_three_matches();
+    test_clue_loses_on_tenth_without_all_matches();
+    test_clue_unknown_character_is_free();
     CHECK_REPORT("test_adventure");
 }

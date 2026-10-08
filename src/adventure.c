@@ -403,10 +403,73 @@ static void handle_inventory(Game *game, const char *argument) {
     print_items("You are carrying:", game->avatar->inventory, "nothing");
 }
 
+/* Which of the three parts of the answer the avatar's room currently satisfies. */
+typedef struct ClueResult {
+    bool room;
+    bool character;
+    bool item;
+} ClueResult;
+
+/* Compares the avatar's surroundings with the answer; the inventory counts as the room. */
+static ClueResult evaluate_clue(const Game *game) {
+    const Room *here = game->avatar->room;
+    ClueResult result;
+    result.room = here == game->answer_room;
+    result.character = game->answer_character->room == here;
+    result.item = find_item(here->items, game->answer_item) != NULL ||
+                  find_item(game->avatar->inventory, game->answer_item) != NULL;
+    return result;
+}
+
+/* Prints the spec's match lines, or a line saying nothing matched. */
+static void print_matches(ClueResult result) {
+    if (result.room) {
+        puts("Room Match");
+    }
+    if (result.character) {
+        puts("Character Match");
+    }
+    if (result.item) {
+        puts("Item Match");
+    }
+    if (!result.room && !result.character && !result.item) {
+        puts("No matches.");
+    }
+}
+
+/* Decides win, loss or carry on after a clue has been counted. */
+static void resolve_clue(Game *game, ClueResult result) {
+    if (result.room && result.character && result.item) {
+        printf("You solved the mystery: it was %s in the %s with the %s. You win!\n",
+               game->answer_character->name, game->answer_room->name, game->answer_item);
+        game->state = GAME_WON;
+    } else if (game->clues_used >= MAX_CLUES) {
+        printf("That was your %dth clue. It was %s in the %s with the %s. You lose.\n",
+               MAX_CLUES, game->answer_character->name, game->answer_room->name,
+               game->answer_item);
+        game->state = GAME_LOST;
+    } else {
+        printf("Clues used: %d of %d.\n", game->clues_used, MAX_CLUES);
+    }
+}
+
+/* Summons a character, counts the clue and reports the matches (docs/design.md section 7). */
 static void handle_clue(Game *game, const char *argument) {
-    (void)game;
-    (void)argument;
-    print_usage("clue");
+    if (*argument == '\0') {
+        print_usage("clue");
+        return;
+    }
+    Character *character = find_character(game->characters, CHARACTER_COUNT, argument);
+    if (character == NULL) {
+        printf("There is no character named '%s'.\n", argument);
+        return;
+    }
+    move_character(character, game->avatar->room);
+    game->clues_used++;
+    printf("%s arrives in the %s.\n", character->name, game->avatar->room->name);
+    ClueResult result = evaluate_clue(game);
+    print_matches(result);
+    resolve_clue(game, result);
 }
 
 /* Ends the game at the player's request. */
