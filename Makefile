@@ -117,6 +117,7 @@ dist: $(DIST_FILES)
 	cp $(DIST_FILES) dist/
 	printf '%s\n' "$$DIST_MAKEFILE" > dist/Makefile
 	$(MAKE) -C dist
+	$(MAKE) -C dist clean
 	@echo "dist/ is ready: $$(ls dist | tr '\n' ' ')"
 
 # ---- clean -------------------------------------------------------------------
